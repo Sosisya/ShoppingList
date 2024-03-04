@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
 import com.example.shoppinglist.domain.ShopItem
 import java.io.LineNumberReader
@@ -15,36 +16,21 @@ import java.io.LineNumberReader
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
-    private lateinit var llShopList: LinearLayout
+    private lateinit var adapter: ShopListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        llShopList = findViewById(R.id.llShopList)
+        setupRecyclerView()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.shopList.observe(this) {
-           showList(it)
+            adapter.shopList = it
         }
     }
 
-    private fun showList(list: List<ShopItem>) {
-        llShopList.removeAllViews()
-    for(shopItem in list) {
-        val layoutId = if (shopItem.enabled) {
-            R.layout.item_shop_enabled
-        } else {
-            R.layout.item_shop_disabled
-        }
-        val view = LayoutInflater.from(this).inflate(layoutId, llShopList, false)
-        val tvName = view.findViewById<TextView>(R.id.tvName)
-        val tvCount = view.findViewById<TextView>(R.id.tvCount)
-        tvName.text = shopItem.name
-        tvCount.text = shopItem.count.toString()
-        view.setOnLongClickListener {
-            viewModel.changeEnableState(shopItem)
-            true
-        }
-        llShopList.addView(view)
-    }
+    private fun setupRecyclerView() {
+        val rvShopList = findViewById<RecyclerView>(R.id.rvShopItems)
+        adapter = ShopListAdapter()
+        rvShopList.adapter = adapter
     }
 }
